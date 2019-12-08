@@ -1,0 +1,64 @@
+vmsf assembly grammar:
+
+START -> FUNCTIONS
+
+INSTRUCTION -> 
+	'nop' |
+	'push' <value> |
+	'add' |
+	'sub' |
+	'mul' |
+	'div' |
+	'addc' |
+	'subc' |
+	'inc' |
+	'dec' |
+	'swap' |
+	'xor' |
+	'and' |
+	'or' |
+	'not' |
+	'call' |
+	'pushpc' |
+	'jmp' <label> |
+	'ret' |
+	'ref' |
+	'dup' |
+	'mod' |
+	'cmp' |
+	'jmpeq' <label> |
+	'jmplt' <label> |
+	'jmpgt' <label> |
+	'jmple' <label> |
+	'jmpge'<label> |
+	'jmpab' <label> |
+	'jmpbl' <label> |
+	'jmpae' <label> |
+	'jmpbe' <label> |
+	'jmpne' <label> |
+	'divmod' <label> |
+	'addsp' |
+	'subsp' |
+	'incsp' |
+	'decsp' |
+	'unref' |
+	'pushbp' |
+	'popbp' |
+	'pushall' |
+	'popall' |
+	'halt' |
+	'pushflags' |
+	'popflags' |
+	'refbp' |
+	'unrefbp' |
+	'int' <value> |
+	'out' <value> |
+	'in' <value> |
+	'pushhwflags' |
+	<label>
+	
+INSTRUCTIONS -> INSTRUCTION INSTRUCTIONS | empty
+
+FUNCTION -> '_func' <label> INSTRUCTIONS
+
+FUNCTIONS -> FUNCTION FUNCTIONS | empty
