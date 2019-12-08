@@ -1,4 +1,4 @@
-vmsf assembly grammar:
+vmsf assembly grammar
 
 START -> FUNCTIONS
 
