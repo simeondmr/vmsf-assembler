@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "../../include/lexer.h"
 
-struct token words[] = {
+struct Token words[] = {
 	{"nop", 0, NOP},
 	{"push", 0, PUSH},
 	{"add", 0, ADD},
@@ -61,19 +61,21 @@ struct token words[] = {
 	{"_func", 0, FUNC}
 };
 
-static struct token find_tok(char *token) 
+char c[2] = {' ', '\0'};
+
+static struct Token find_tok(char *token) 
 {
 	if (islabel(token))
 		return new_tok(token, 0, LABEL);
 	for (int i = 0; i < NUM_WORDS; i++) 
-		if (!strcmp(words[i].name, token)) {puts("find");
-			return words[i];}
+		if (!strcmp(words[i].name, token))
+			return words[i];
 	return new_tok(token, 0, STRING);
 }
 
-static struct token new_tok(char *name, int value, enum tag type) 
+static struct Token new_tok(char *name, int value, enum tag type) 
 {
-	struct token tok;
+	struct Token tok;
 	if (name != NULL)
 		strcpy(tok.name, name);
 	tok.value = value;
@@ -88,46 +90,50 @@ static bool islabel(char *lexeme)
 	return false;
 }
 
-static char skip_space(FILE *fp)
+static void skip_space(FILE *fp)
 {
-	char c;
-	while (fscanf(fp, "%c", &c) != EOF && (c == ' ' || c == '\n')) {
-		if (c == '\n') {
+	while ((c[0] == ' ' || c[0] == '\n') && c[0] != EOF) {
+		if (c[0] == '\n') {
 			//line++
-		} 
+		}
+		fscanf(fp, "%c", &c[0]);
 	}
-	return c;
 }
 
-static struct token read_num(FILE *fp, char *c) 
+static struct Token read_num(FILE *fp) 
 {
-	char number[10];
-	memset(number,'\0', sizeof(number));
-	strcat(number, c);
-	while (fscanf(fp, "%c", &c[0]) != EOF && isdigit(c[0]))
+	char *number = calloc(10, sizeof(char));
+	do {
 		strcat(number, c);
+	} while (fscanf(fp, "%c", &c[0]) != EOF && isdigit(c[0]));
 	char *end;
-	return new_tok(NULL, strtol(number, &end, 10), NUMBER);
+	struct Token tok = new_tok(NULL, strtol(number, &end, 10), NUMBER);
+	free(number);
+	return tok;
 }
 
-static struct token read_kw_l(FILE *fp, char *c)
+static struct Token read_kw_l(FILE *fp)
 {
-	char token[10];
-	memset(token,'\0', sizeof(token));
-	while (fscanf(fp, "%c", &c[0]) != EOF && (isalpha(c[0]) || isdigit(c[0]) || c[0] == ':' )) {
+	char *token = calloc(10, sizeof(char));
+	do {
 		strcat(token, c);
-	}
-	return find_tok(token);
+	} while (fscanf(fp, "%c", &c[0]) != EOF && (isalpha(c[0]) || isdigit(c[0]) || c[0] == ':' ));
+	struct Token tok = find_tok(token);
+	free(token);
+	return tok;
 }
 
-struct token next_tok(FILE *fp) 
-{	
+struct Token next_tok(FILE *fp) 
+{
 	if (feof(fp))
 		return new_tok(NULL, 0, END_FILE);
-	char c[2] = {'\0','\0'};
-	c[0] = skip_space(fp);
+	skip_space(fp);
 	if (isdigit(c[0])) 
-		return read_num(fp, c);
+		return read_num(fp);
 	else if (isalpha(c[0]) || c[0] == '_') 
-		return read_kw_l(fp, c);
+		return read_kw_l(fp);
+}
+
+void init_lexer(void) {
+	strcpy(c, " ");
 }

@@ -63,18 +63,19 @@ enum tag {
 	END_FILE
 };
 
-struct token {
+struct Token {
 	char name[20];
 	int value;
 	enum tag type;
 };
 
-struct token next_tok(FILE *fp);
+struct Token next_tok(FILE *fp);
+void init_lexer(void);
 static bool islabel(char *lexeme);
-static struct token new_tok(char *name, int value, enum tag type);
-static struct token find_tok(char *token);
-static struct token read_num(FILE * fp, char *c);
-static char skip_space(FILE *fp);
-static struct token read_kw_l(FILE *fp, char *c);
+static struct Token new_tok(char *name, int value, enum tag type);
+static struct Token find_tok(char *token);
+static struct Token read_num(FILE *fp);
+static void skip_space(FILE *fp);
+static struct Token read_kw_l(FILE *fp);
 
 #endif
