@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #define NUM_WORDS 54
 
-enum tag {
+enum Tag {
 	NOP,
 	PUSH,
 	ADD,
@@ -56,8 +56,8 @@ enum tag {
 	OUT,
 	IN,
 	PUSHHWFLAGS,
-	FUNC,
 	LABEL,
+	FUNC,
 	NUMBER,
 	STRING,
 	END_FILE
@@ -66,13 +66,13 @@ enum tag {
 struct Token {
 	char name[20];
 	int value;
-	enum tag type;
+	enum Tag type;
 };
 
 struct Token next_tok(FILE *fp);
 void init_lexer(void);
 static bool islabel(char *lexeme);
-static struct Token new_tok(char *name, int value, enum tag type);
+static struct Token new_tok(char *name, int value, enum Tag type);
 static struct Token find_tok(char *token);
 static struct Token read_num(FILE *fp);
 static void skip_space(FILE *fp);

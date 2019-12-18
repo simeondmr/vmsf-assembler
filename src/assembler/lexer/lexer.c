@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdbool.h>
-#include "../../include/lexer.h"
+#include "../../include/lexer/lexer.h"
 
 struct Token words[] = {
 	{"nop", 0, NOP},
@@ -73,7 +73,7 @@ static struct Token find_tok(char *token)
 	return new_tok(token, 0, STRING);
 }
 
-static struct Token new_tok(char *name, int value, enum tag type) 
+static struct Token new_tok(char *name, int value, enum Tag type) 
 {
 	struct Token tok;
 	if (name != NULL)
