@@ -3,7 +3,7 @@
 #include <string.h>
 #include "../../include/symbol-table/symbol_table.h"
 
-static struct Function *new_func(char *name, int addr, bool resolved)
+static struct Function *new_func(char *name, uint32_t addr, bool resolved)
 {
 	struct Function *function = malloc(sizeof(struct Function));
 	function->name = malloc((strlen(name) + 1) * sizeof(char));
@@ -15,7 +15,7 @@ static struct Function *new_func(char *name, int addr, bool resolved)
 	return function;
 }
 
-static struct Label *new_label(char *name, int addr, bool resolved)
+static struct Label *new_label(char *name, uint32_t addr, bool resolved)
 {
 	struct Label *label = malloc(sizeof(struct Label));
 	label->name = malloc((strlen(name) + 1) *sizeof(char));
@@ -47,7 +47,7 @@ static struct Label *search_label(struct Function *head, char *fname, char *name
 	return NULL;
 }
 
-bool decl_func(struct Function **head, char *name, int addr, bool resolved)
+bool decl_func(struct Function **head, char *name, uint32_t addr, bool resolved)
 {
 	if (*head == NULL) 
 		*head = new_func(name, addr, resolved);
@@ -65,7 +65,7 @@ bool decl_func(struct Function **head, char *name, int addr, bool resolved)
 	return true;
 }
 
-bool decl_label(struct Function *head, char *fname, char *name, int addr, bool resolved)
+bool decl_label(struct Function *head, char *fname, char *name, uint32_t addr, bool resolved)
 {
 	struct Function *curr = search_func(head, fname);
 	if (curr->labels == NULL)
@@ -86,7 +86,7 @@ bool decl_label(struct Function *head, char *fname, char *name, int addr, bool r
 
 
 
-void resolve_func(struct Function *head, char *name, int addr)
+void resolve_func(struct Function *head, char *name, uint32_t addr)
 {
 	struct Function *func = search_func(head, name);
 	if (func != NULL) {
@@ -95,9 +95,13 @@ void resolve_func(struct Function *head, char *name, int addr)
 	} else fprintf(stderr, "The function %s is not finded\n", name);
 }
 
-void resolve_label(struct Function *head, char *fname, char *name)
+void resolve_label(struct Function *head, char *fname, char *name, uint32_t addr)
 {
-	
+	struct Label *label = search_label(head, fname, name);
+	if (label != NULL) {
+		label->addr = addr;
+		label->resolved = true;
+	} else fprintf(stderr, "Label not found\n");
 }
 
 void free_func(struct Function *head)
