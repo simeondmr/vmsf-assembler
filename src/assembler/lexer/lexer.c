@@ -70,7 +70,7 @@ static struct Token find_tok(char *token)
 	for (int i = 0; i < NUM_WORDS; i++) 
 		if (!strcmp(words[i].name, token))
 			return words[i];
-	return new_tok(token, 0, STRING);
+	return new_tok(token, 0, LITERAL);
 }
 
 static struct Token new_tok(char *name, int value, enum Tag type) 
@@ -85,19 +85,21 @@ static struct Token new_tok(char *name, int value, enum Tag type)
 
 static bool islabel(char *lexeme) 
 {
-	if (lexeme[strlen(lexeme) -1 ] == ':')
+	int len = strlen(lexeme);
+	if (lexeme[len - 1] == ':') {
+		lexeme[len -1] = '\0';
 		return true;
+	}
 	return false;
 }
 
 static void skip_space(FILE *fp)
 {
-	while ((c[0] == ' ' || c[0] == '\n') && c[0] != EOF) {
+	do {
 		if (c[0] == '\n') {
 			//line++
 		}
-		fscanf(fp, "%c", &c[0]);
-	}
+	} while (fscanf(fp, "%c", &c[0]) != EOF && (c[0] == ' ' || c[0] == '\n'));
 }
 
 static struct Token read_num(FILE *fp) 
@@ -117,6 +119,8 @@ static struct Token read_kw_l(FILE *fp)
 	char *token = calloc(10, sizeof(char));
 	do {
 		strcat(token, c);
+		if (c[0] == ':')
+			break;
 	} while (fscanf(fp, "%c", &c[0]) != EOF && (isalpha(c[0]) || isdigit(c[0]) || c[0] == ':' ));
 	struct Token tok = find_tok(token);
 	free(token);
@@ -125,9 +129,9 @@ static struct Token read_kw_l(FILE *fp)
 
 struct Token next_tok(FILE *fp) 
 {
+	skip_space(fp);
 	if (feof(fp))
 		return new_tok(NULL, 0, END_FILE);
-	skip_space(fp);
 	if (isdigit(c[0])) 
 		return read_num(fp);
 	else if (isalpha(c[0]) || c[0] == '_') 

@@ -3,6 +3,19 @@
 #include <string.h>
 #include "../../include/symbol-table/symbol_table.h"
 
+void print_func_debug(struct Function *function)
+{
+	while (function != NULL) {
+		printf("Name: %s resolved: %d\n", function->name, function->resolved);
+		struct Label *tmp = function->labels;
+		while (tmp != NULL) {
+			printf("Label %s resolved %d\n", tmp->name, tmp->resolved);
+			tmp = tmp->next;
+		}
+		function = function->next;
+	}
+}
+
 static struct Function *new_func(char *name, uint32_t addr, bool resolved)
 {
 	struct Function *function = malloc(sizeof(struct Function));
@@ -18,7 +31,7 @@ static struct Function *new_func(char *name, uint32_t addr, bool resolved)
 static struct Label *new_label(char *name, uint32_t addr, bool resolved)
 {
 	struct Label *label = malloc(sizeof(struct Label));
-	label->name = malloc((strlen(name) + 1) *sizeof(char));
+	label->name = malloc((strlen(name) + 1) * sizeof(char));
 	strcpy(label->name, name);
 	label->addr = addr;
 	label->resolved = resolved;
@@ -36,72 +49,103 @@ static struct Function *search_func(struct Function *head, char *name)
 	return NULL;
 }
 
-static struct Label *search_label(struct Function *head, char *fname, char *name)
+static struct Label *search_label(struct Function *curr, char *name)
 {
-	struct Function *func = search_func(head, fname);
-	while (func->labels != NULL) {
-		if (!strcmp(func->labels->name, name))
-			return func->labels;
-		func->labels = func->labels->next;
+	struct Label *tmp = curr->labels;
+	while (tmp != NULL) {
+		if (!strcmp(tmp->name, name))
+			return tmp;
+		tmp = tmp->next;
 	}
 	return NULL;
 }
 
-bool decl_func(struct Function **head, char *name, uint32_t addr, bool resolved)
+struct Function *decl_func(struct Function **head, char *name, uint32_t addr, bool resolved)
 {
-	if (*head == NULL) 
+	if (*head == NULL) {
 		*head = new_func(name, addr, resolved);
-	else {
+		return *head;
+	} else {
 		struct Function *curr = *head;
 		while (curr->next != NULL) {
-			if (!strcmp(curr->name, name))
-				return false;
+			if (!strcmp(curr->name, name)) {
+				fprintf(stderr, "Error: function '%s' is already present\n", name);
+				exit(1);
+			}
 			curr = curr->next;
 		}
-		if (!strcmp(curr->name, name))
-			return false;
+		if (!strcmp(curr->name, name)) {
+			fprintf(stderr, "Error: function '%s' is already present\n", name);
+			exit(1);
+		}
 		curr->next = new_func(name, addr, resolved);
+		return curr->next;
 	}
-	return true;
 }
 
-bool decl_label(struct Function *head, char *fname, char *name, uint32_t addr, bool resolved)
+void decl_label(struct Function *curr, char *name, uint32_t addr, bool resolved)
 {
-	struct Function *curr = search_func(head, fname);
-	if (curr->labels == NULL)
+	if (curr->labels == NULL) {
 		curr->labels = new_label(name, addr, resolved);
-	else {
+	} else {
 		struct Label *labels = curr->labels;
 		while (labels->next != NULL) {
-			if (!strcmp(labels->name, name))
-				return false;
+			if (!strcmp(labels->name, name)) {
+				fprintf(stderr, "Error in function '%s': label %s is already present\n", curr->name, name);
+				exit(1);
+			}
 			labels = labels->next;
 		}
-		if (!strcmp(labels->name, name))
-			return false;
+		if (!strcmp(labels->name, name)) {
+				fprintf(stderr, "Error in function '%s': label %s is already present\n", curr->name, name);
+				exit(1);
+		}
 		labels->next = new_label(name, addr, resolved);
 	}
-	return true;
 }
 
-
-
-void resolve_func(struct Function *head, char *name, uint32_t addr)
+struct Function *resolve_func(struct Function **head, char *name, uint32_t addr)
 {
-	struct Function *func = search_func(head, name);
-	if (func != NULL) {
+	struct Function *func = search_func(*head, name);
+	if (func != NULL && !func->resolved) {
 		func->addr = addr;
 		func->resolved = true;
-	} else fprintf(stderr, "The function %s is not finded\n", name);
+		return NULL;
+	} else return decl_func(head, name, addr, true);
 }
 
-void resolve_label(struct Function *head, char *fname, char *name, uint32_t addr)
+void resolve_label(struct Function *head, char *name, uint32_t addr)
 {
-	struct Label *label = search_label(head, fname, name);
-	if (label != NULL) {
+	struct Label *label = search_label(head, name);
+	if (label != NULL && !label->resolved) {
 		label->addr = addr;
 		label->resolved = true;
-	} else fprintf(stderr, "Label not found\n");
+	} else decl_label(head, name, addr, true);
+}
+
+void check_resolved_func(struct Function *head)
+{
+	while (head != NULL) {
+		if (!head->resolved) {
+			fprintf(stderr, "Error: the function '%s' is not defined\n", head->name);
+			exit(1);
+		}
+		head = head->next;
+	}
+}
+
+void isfunc_defined(struct Function **head, char *name)
+{
+	struct Function *func = search_func(*head, name);
+	if (func == NULL)
+		decl_func(head, name, 0, false);
+}
+
+void islabel_defined(struct Function *curr, char *name)
+{
+	struct Label *label = search_label(curr, name);
+	if (label == NULL)
+		decl_label(curr, name, 0, false); 
 }
 
 void free_func(struct Function *head)

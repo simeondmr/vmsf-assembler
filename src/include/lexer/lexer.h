@@ -1,7 +1,7 @@
 #ifndef __LEXER_H
 #define __LEXER_H
 #include <stdbool.h>
-#define NUM_WORDS 54
+#define NUM_WORDS 53
 
 enum Tag {
 	NOP,
@@ -59,7 +59,7 @@ enum Tag {
 	LABEL,
 	FUNC,
 	NUMBER,
-	STRING,
+	LITERAL,
 	END_FILE
 };
 
