@@ -6,10 +6,10 @@
 void print_func_debug(struct Function *function)
 {
 	while (function != NULL) {
-		printf("Name: %s resolved: %d\n", function->name, function->resolved);
+		printf("Name: %s resolved: %d byte: %d\n", function->name, function->resolved, function->addr);
 		struct Label *tmp = function->labels;
 		while (tmp != NULL) {
-			printf("Label %s resolved %d\n", tmp->name, tmp->resolved);
+			printf("Label %s resolved %d byte: %d\n", tmp->name, tmp->resolved, tmp->addr);
 			tmp = tmp->next;
 		}
 		function = function->next;
@@ -83,10 +83,11 @@ struct Function *decl_func(struct Function **head, char *name, uint32_t addr, bo
 	}
 }
 
-void decl_label(struct Function *curr, char *name, uint32_t addr, bool resolved)
+struct Label *decl_label(struct Function *curr, char *name, uint32_t addr, bool resolved)
 {
 	if (curr->labels == NULL) {
 		curr->labels = new_label(name, addr, resolved);
+		return curr->labels;
 	} else {
 		struct Label *labels = curr->labels;
 		while (labels->next != NULL) {
@@ -101,6 +102,7 @@ void decl_label(struct Function *curr, char *name, uint32_t addr, bool resolved)
 				exit(1);
 		}
 		labels->next = new_label(name, addr, resolved);
+		return labels->next;
 	}
 }
 
@@ -110,17 +112,18 @@ struct Function *resolve_func(struct Function **head, char *name, uint32_t addr)
 	if (func != NULL && !func->resolved) {
 		func->addr = addr;
 		func->resolved = true;
-		return NULL;
+		return func;
 	} else return decl_func(head, name, addr, true);
 }
 
-void resolve_label(struct Function *head, char *name, uint32_t addr)
+struct Label *resolve_label(struct Function *head, char *name, uint32_t addr)
 {
 	struct Label *label = search_label(head, name);
 	if (label != NULL && !label->resolved) {
 		label->addr = addr;
 		label->resolved = true;
-	} else decl_label(head, name, addr, true);
+		return label;
+	} else return decl_label(head, name, addr, true);
 }
 
 void check_resolved_func(struct Function *head)
