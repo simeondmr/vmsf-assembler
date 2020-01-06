@@ -1,8 +1,8 @@
-vmsf assembly grammar
+VMSF assembly grammar
 
-START -> FUNCTIONS
+start: functions
 
-INSTRUCTION -> 
+instruction:
 	'nop' |
 	'push' <value> |
 	'add' |
@@ -20,23 +20,23 @@ INSTRUCTION ->
 	'not' |
 	'call' |
 	'pushpc' |
-	'jmp' <label> |
+	'jmp' <literal> |
 	'ret' |
 	'ref' |
 	'dup' |
 	'mod' |
 	'cmp' |
-	'jmpeq' <label> |
-	'jmplt' <label> |
-	'jmpgt' <label> |
-	'jmple' <label> |
-	'jmpge'<label> |
-	'jmpab' <label> |
-	'jmpbl' <label> |
-	'jmpae' <label> |
-	'jmpbe' <label> |
-	'jmpne' <label> |
-	'divmod' <label> |
+	'jmpeq' <literal> |
+	'jmplt' <literal> |
+	'jmpgt' <literal> |
+	'jmple' <literal> |
+	'jmpge' <literal> |
+	'jmpab' <literal> |
+	'jmpbl' <literal> |
+	'jmpae' <literal> |
+	'jmpbe' <literal> |
+	'jmpne' <literal> |
+	'divmod' |
 	'addsp' |
 	'subsp' |
 	'incsp' |
@@ -57,8 +57,14 @@ INSTRUCTION ->
 	'pushhwflags' |
 	<label>
 	
-INSTRUCTIONS -> INSTRUCTION INSTRUCTIONS | empty
+instructions: instruction instructions | empty
 
-FUNCTION -> '_func' <label> INSTRUCTIONS
+function: '_func' <label> instructions
 
-FUNCTIONS -> FUNCTION FUNCTIONS | empty
+functions: function functions | empty
+
+<label>: [a-zA-Z]+ [0-9]* ':'
+
+<literal>: [a-zA-Z]+ [0-9]*
+
+<value>: [0-9]+
