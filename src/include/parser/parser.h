@@ -8,7 +8,7 @@
 typedef void (istrs)(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code);
 void init_parser(char *file);
 static void match(enum Tag type);
-void start(void);
+void start(const char *output_file);
 static void functions(struct Function **functions, uint32_t *curr_byte, uint8_t *code);
 static void function(struct Function **functions, uint32_t *curr_byte, uint8_t *code);
 static void instructions(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code);

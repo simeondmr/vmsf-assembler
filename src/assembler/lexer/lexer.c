@@ -132,7 +132,7 @@ struct Token next_tok(FILE *fp)
 	skip_space(fp);
 	if (feof(fp))
 		return new_tok(NULL, 0, END_FILE);
-	if (isdigit(c[0])) 
+	if (isdigit(c[0]) || c[0] == '-' || c[0] == '+') 
 		return read_num(fp);
 	else if (isalpha(c[0]) || c[0] == '_') 
 		return read_kw_l(fp);

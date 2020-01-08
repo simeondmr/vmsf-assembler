@@ -61,6 +61,7 @@ enum Opcodes
 };
 
 void code_gen_no_arg(uint8_t *code, enum Opcodes opcode, uint32_t *addr);
-void code_out(char *fname, uint8_t *code, uint32_t byte);
+void code_out(const char *output_file, uint8_t *code, uint32_t byte);
+void code_gen_one_arg(uint8_t *code, enum Opcodes opcode, uint32_t param, uint32_t *addr);
 
 #endif

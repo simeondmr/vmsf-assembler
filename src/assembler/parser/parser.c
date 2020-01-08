@@ -89,7 +89,7 @@ static bool is_istr(enum Tag type)
 	return type != FUNC && type != LITERAL && type != END_FILE;
 }
 
-void start(void)
+void start(const char *output_file)
 {
 	struct Function *funcs = NULL;
 	uint32_t curr_byte = 0;
@@ -100,7 +100,7 @@ void start(void)
 	print_func_debug(funcs);
 	check_resolved_func(funcs);
 	//TODO: check for unresolved label
-	code_out("test", generated_code, curr_byte);
+	code_out(output_file, generated_code, curr_byte);
 	printf("Byte %d\n", curr_byte);
 	free_func(funcs);
 	free(generated_code);
@@ -136,6 +136,8 @@ static void nop(struct Function *curr, struct Function **functions, uint32_t *cu
 static void push(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code)
 {
 	match(PUSH);
+	code_gen_one_arg(code, OPC_PUSH, current.value, curr_byte);
+	match(NUMBER);
 }
 
 static void add(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code)
@@ -429,19 +431,21 @@ static void unrefbp(struct Function *curr, struct Function **functions, uint32_t
 static void interrupt(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code)
 {
 	match(INTERRUPT);
-	code_gen_no_arg(code, OPC_INT, curr_byte);
+	code_gen_one_arg(code, OPC_INT, current.value ,curr_byte);
 }
 
 static void out(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code)
 {
 	match(OUT);
-	code_gen_no_arg(code, OPC_OUT, curr_byte);
+	code_gen_one_arg(code, OPC_OUT, current.value, curr_byte);
+	match(NUMBER);
 }
 
 static void in(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code)
 {
 	match(IN);
-	code_gen_no_arg(code, OPC_IN, curr_byte);
+	code_gen_one_arg(code, OPC_IN, current.value , curr_byte);
+	match(NUMBER);
 }
 
 static void pushhwflags(struct Function *curr, struct Function **functions, uint32_t *curr_byte, uint8_t *code)
