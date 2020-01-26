@@ -63,8 +63,8 @@ function: '_func' <label> instructions
 
 functions: function functions | empty
 
-<label>: [a-zA-Z]+ [0-9]* ':'
+<label>: [a-zA-Z] [a-zA-Z0-9]* ':'
 
-<literal>: [a-zA-Z]+ [0-9]*
+<literal>: [a-zA-Z] [a-zA-Z0-9]*
 
 <value>: [0-9]+
